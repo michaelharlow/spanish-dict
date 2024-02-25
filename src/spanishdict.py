@@ -1,9 +1,9 @@
 import scrapper
 
 
-def get_word(word):
-    return scrapper.get_translations(word)
+def translate(word):
+    return scrapper.get_translation_data(word)
 
 
-def get_page(word):
+def translate(word):
     return scrapper.get_translation_data(word)

@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-import re
+
 import json
 
 import spanishdict
@@ -36,8 +36,6 @@ def fun(word):
 
 
 if __name__ == '__main__':
-    # print(spanishdict.get_word('milk'))
-    # print(spanishdict.get_word('to milk'))
-    print(spanishdict.get_page('milk').get_translations())
-    print(spanishdict.get_page('pig').get_translations())
-    print(spanishdict.get_page('milk').get_translations())
+    print(spanishdict.translate('hola'))
+    for item in spanishdict.translate('adios'):
+        print(item)

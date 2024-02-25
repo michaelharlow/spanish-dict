@@ -2,16 +2,31 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
+import json
+
 recent_requests = {}
+
+
+class Translation(dict):
+    def __init__(self, translation, context, example):
+        dict.__init__(self, translation=translation,
+                      context=context, example=example)
+
+    def __str__(self) -> str:
+        return self['translation']
 
 
 class TranslationPage(dict):
     def __init__(self, word, translations, contexts, examples):
-        dict.__init__(self, word=word, translations=translations,
-                      contexts=contexts, examples=examples)
+        dict.__init__(self, word=word, pageData=[Translation(translation, context, example) for (
+            translation, context, example) in zip(translations, contexts, examples)])
 
-    def get_translations(self):
-        return self['translations']
+    def __str__(self) -> str:
+        return str(self['pageData'][0])
+
+    def __iter__(self):
+        for item in self['pageData']:
+            yield item
 
 
 def _request_translation_page(word):
@@ -33,11 +48,15 @@ def _parse_translation_page(response, word):
     contexts = [context.text for context in contexts]
 
     examples_top = soup.find_all('span', class_='bXF90XJM')
+    lang_top = examples_top[0].get('lang')
     examples_top = [example.text for example in examples_top]
+
     examples_bottom = soup.find_all('span', class_='LneYEI1C')
+    lang_bottom = examples_bottom[0].get('lang')
     examples_bottom = [example.text for example in examples_bottom]
-    examples = {top: bottom for (top, bottom) in zip(
-        examples_top, examples_bottom)}
+
+    examples = [{lang_top: top, lang_bottom: bottom} for (top, bottom)
+                in zip(examples_top, examples_bottom)]
 
     return TranslationPage(word, translations, contexts, examples)
 
