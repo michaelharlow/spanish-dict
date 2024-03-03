@@ -30,12 +30,18 @@ def fun(word):
     words = soup.find_all(string=True)
 
     for w in words:
-        if w.parent.name not in ['a', 'span'] or w.parent.get('lang') is None:
-            continue
-        print(w)
+        if w.parent.name == 'script' and 'SD_COMPONENT_DATA' in w:
+            return w
 
 
 if __name__ == '__main__':
-    print(spanishdict.translate('hola'))
-    for item in spanishdict.translate('adios'):
-        print(item)
+    # print(json.dumps(spanishdict.translate('hola'), indent=2))
+    # print(json.dumps(spanishdict.translate('hello'), indent=2))
+    # for item in spanishdict.translate('adios'):
+    #     print(item)
+    obj = json.loads(fun('milk').split(
+        'SD_COMPONENT_DATA = ')[1].split(';')[0]).get('sdDictionaryResultsProps').get('entry').get('neodict')[0].get('posGroups')[1].get('senses')
+
+    print(obj)
+
+    # loop through every key and subkey in the dictionary

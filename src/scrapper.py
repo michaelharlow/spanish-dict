@@ -8,12 +8,27 @@ recent_requests = {}
 
 
 class Translation(dict):
-    def __init__(self, translation, context, example):
-        dict.__init__(self, translation=translation,
-                      context=context, example=example)
+    def __init__(self, translation, context, example, gender, partOfSpeech, audioUrl, region):
+        dict.__setitem__(self, translation, {
+                         'context': context,
+                         'example': example,
+                         'gender': gender,
+                         'partOfSpeech': partOfSpeech,
+                         'audioUrl': audioUrl,
+                         'region': region
+                         })
+
+    def translation(self):
+        return self['translation']
+
+    def context(self):
+        return self['context']
+
+    def example(self):
+        return self['example']
 
     def __str__(self) -> str:
-        return self['translation']
+        return self.translation()
 
 
 class TranslationPage(dict):
