@@ -8,18 +8,17 @@ recent_requests = {}
 
 
 class Translation(dict):
-    def __init__(self, translation, context, example, gender, partOfSpeech, audioUrl, region):
+    def __init__(self, translation, context, example, gender, partOfSpeech, region):
         dict.__setitem__(self, translation, {
                          'context': context,
                          'example': example,
                          'gender': gender,
                          'partOfSpeech': partOfSpeech,
-                         'audioUrl': audioUrl,
                          'region': region
                          })
 
     def translation(self):
-        return self['translation']
+        return list(self.keys())[0]
 
     def context(self):
         return self['context']
@@ -32,15 +31,14 @@ class Translation(dict):
 
 
 class TranslationPage(dict):
-    def __init__(self, word, translations, contexts, examples):
-        dict.__init__(self, word=word, pageData=[Translation(translation, context, example) for (
-            translation, context, example) in zip(translations, contexts, examples)])
+    def __init__(self, word, data):
+        dict.__init__(self, word=word, data=data)
 
     def __str__(self) -> str:
-        return str(self['pageData'][0])
+        return str(self['data'][0])
 
     def __iter__(self):
-        for item in self['pageData']:
+        for item in self['data']:
             yield item
 
 
@@ -54,26 +52,30 @@ def _request_translation_page(word):
 
 
 def _parse_translation_page(response, word):
+    all_translations = []
+
     soup = BeautifulSoup(response, 'html.parser')
 
-    translations = soup.find_all('a', class_='HOypmmqy')
-    translations = [word.text for word in translations]
+    words = soup.find_all(string=True)
 
-    contexts = soup.find_all('span', class_='a9peX5qq')
-    contexts = [context.text for context in contexts]
+    for w in words:
+        if w.parent.name == 'script' and 'SD_COMPONENT_DATA' in w:
+            obj = json.loads(w.split(
+                'SD_COMPONENT_DATA = ')[1].split(';')[0]).get('sdDictionaryResultsProps').get('entry').get('neodict')[0].get('posGroups')
 
-    examples_top = soup.find_all('span', class_='bXF90XJM')
-    lang_top = examples_top[0].get('lang')
-    examples_top = [example.text for example in examples_top]
+    for sense in obj:
+        for item in sense.get('senses'):
+            all_translations.append(
+                Translation(translation=item.get('translations')[0].get('translation'),
+                            context=item.get('contextEn'),
+                            example=item.get('translations')[
+                    0].get('examples'),
+                    gender=item.get('translations')[0].get('gender'),
+                    partOfSpeech=item.get(
+                                'partOfSpeech').get('nameEn'),
+                    region=item.get('region')))
 
-    examples_bottom = soup.find_all('span', class_='LneYEI1C')
-    lang_bottom = examples_bottom[0].get('lang')
-    examples_bottom = [example.text for example in examples_bottom]
-
-    examples = [{lang_top: top, lang_bottom: bottom} for (top, bottom)
-                in zip(examples_top, examples_bottom)]
-
-    return TranslationPage(word, translations, contexts, examples)
+    return TranslationPage(word, all_translations)
 
 
 def get_translation_data(word):

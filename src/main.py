@@ -37,11 +37,12 @@ def fun(word):
 if __name__ == '__main__':
     # print(json.dumps(spanishdict.translate('hola'), indent=2))
     # print(json.dumps(spanishdict.translate('hello'), indent=2))
-    # for item in spanishdict.translate('adios'):
-    #     print(item)
-    obj = json.loads(fun('milk').split(
-        'SD_COMPONENT_DATA = ')[1].split(';')[0]).get('sdDictionaryResultsProps').get('entry').get('neodict')[0].get('posGroups')[1].get('senses')
+    for item in spanishdict.translate('milk'):
+        print(item)
+    # obj = json.loads(fun('milk').split(
+    #     'SD_COMPONENT_DATA = ')[1].split(';')[0]).get('sdDictionaryResultsProps').get('entry').get('neodict')[0].get('posGroups')[1].get('senses')
 
-    print(obj)
+    # print(repr(spanishdict.translate('milk')))
+    print(json.dumps(spanishdict.translate("milk"), indent=2))
 
     # loop through every key and subkey in the dictionary
